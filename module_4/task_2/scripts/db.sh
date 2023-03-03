@@ -35,6 +35,24 @@ list() {
   cat $db_file | awk '{print NR". " $1 " " $2}'
 }
 
+find() {
+  read -p "Enter username to find: " username
+
+
+  hasFoundUsers=$(cat $db_file | grep $username | wc -l)
+
+  if [[ hasFoundUsers -gt 0 ]]; then
+      cat $db_file | grep $username
+  else
+    
+      echo "User not found"
+      exit 1
+  fi
+
+
+  
+}
+
 help() {
   echo "Manages users in db file."
   echo 
@@ -56,6 +74,7 @@ help() {
 
 case $command in
     add)           add;;
+    find)          find;;
     list)          list;;
     help | '' | *) help;;
 esac
