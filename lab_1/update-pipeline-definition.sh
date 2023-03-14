@@ -1,4 +1,4 @@
-#! /usr/bin/env bash -xe 
+#! /usr/bin/env bash -e 
 
 declare creation_date=$(date +'%Y_%m_%d_%H_%M')
 declare branch=""
@@ -7,6 +7,49 @@ declare poll_for_source_changes=""
 declare build_configuration=""
 declare path_to_file=$1
 
+ARGUMENT_LIST=(
+  "configuration"
+  "owner"
+  "branch"
+  "poll_for_source_changes"
+)
+
+
+# read arguments
+opts=$(getopt \
+  --longoptions "$(printf "%s:," "${ARGUMENT_LIST[@]}")" \
+  -- "$@"
+)
+
+eval set --$opts
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --configuration)
+      build_configuration=$2
+      shift 2
+      ;;
+    --owner)
+      owner=$2
+      shift 2
+      ;;
+    --branch)
+      branch=$2
+      shift 2
+      ;;
+    --poll_for_source_changes)
+      poll_for_source_changes=$2
+      shift 2
+      ;;
+    --)
+      shift 2
+      ;;
+
+    *)
+      break
+      ;;
+  esac
+done
 
 if ! command -v jq &> /dev/null
 then
@@ -52,4 +95,4 @@ hasAllProperties=$(jq \
                                      .actions[0].configuration.EnvironmentVariables | sub("{{BUILD_CONFIGURATION value}}"; $build_configuration)
                                      ) else . end)
           else . end
-         ' < $path_to_file
+         ' < $path_to_file > "pipeline-$creation_date.json"
